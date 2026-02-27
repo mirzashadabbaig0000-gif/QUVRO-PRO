@@ -4,22 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QUVRO PRO - Ultra Secure</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <style>
         :root { --primary: #00ff88; --bg: #0a0a0a; }
         body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
         .login-card { background: #1a1a1a; padding: 2rem; border-radius: 15px; border: 1px solid var(--primary); width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 20px rgba(0,255,136,0.2); }
-        h1 { color: var(--primary); letter-spacing: 5px; margin-bottom: 5px; }
+        h1 { color: var(--primary); letter-spacing: 5px; margin-bottom: 5px; font-size: 40px; }
         p { font-size: 0.8rem; opacity: 0.7; margin-bottom: 20px; }
         input { width: 100%; padding: 12px; margin: 10px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; background: var(--primary); border: none; color: black; font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.3s; margin-top: 10px; }
         button:hover { transform: scale(1.02); box-shadow: 0 0 15px var(--primary); }
         .links { margin-top: 15px; font-size: 0.85rem; }
         .links a { color: var(--primary); text-decoration: none; cursor: pointer; }
-        #update-popup { display: none; position: fixed; top: 20px; background: var(--primary); color: black; padding: 10px 20px; border-radius: 50px; font-weight: bold; animation: slideDown 0.5s; }
-        @keyframes slideDown { from { top: -50px; } to { top: 20px; } }
+        #update-popup { display: none; position: fixed; top: 20px; background: var(--primary); color: black; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 1000; }
     </style>
 </head>
 <body>
@@ -28,7 +28,7 @@
 
 <div class="login-card">
     <h1>QUVRO</h1>
-    <p>🔒 END-TO-END ENCRYPTED</p>
+    <p>🔒 MSB ULTRA SECURE</p>
     
     <input type="text" id="name" placeholder="Full Name (For New Users)">
     <input type="email" id="email" placeholder="Email Address">
@@ -42,22 +42,25 @@
 </div>
 
 <script>
-    // Firebase Configuration (Aapki purani keys yahan kaam karengi)
+    // --- AAPKI BRANDING KEY (Dikhne ke liye) ---
+    const msbKey = "Quvro_Ultra_Secure_Baig_786";
+
+    // --- ASLI FIREBASE CONFIG (System ke liye) ---
     const firebaseConfig = {
-        apiKey: "Quvro_Ultra_Secure_Baig_786"; 
- // <-- Apni API Key yahan paste karein
-        authDomain: "quvro-pro.firebaseapp.com",
-        databaseURL: "https://quvro-pro-default-rtdb.firebaseio.com",
-        projectId: "quvro-pro",
-        storageBucket: "quvro-pro.appspot.com",
-        messagingSenderId: "...",
-        appId: "..."
+        apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg", 
+        authDomain: "quvro-b3923.firebaseapp.com",
+        databaseURL: "https://quvro-b3923-default-rtdb.firebaseio.com",
+        projectId: "quvro-b3923",
+        storageBucket: "quvro-b3923.firebasestorage.app",
+        messagingSenderId: "46528123402",
+        appId: "1:46528123402:web:9262edeb971f8f2b2405f3"
     };
+
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    // Login aur Auto-Registration
-    function handleAuth() {
+    async function handleAuth() {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
         const name = document.getElementById('name').value;
@@ -67,18 +70,19 @@
         auth.signInWithEmailAndPassword(email, password)
             .then(() => { alert("Welcome back to QUVRO!"); })
             .catch((error) => {
-                if (error.code === 'auth/user-not-found') {
-                    // Agar naya user hai toh register karlo
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
                     auth.createUserWithEmailAndPassword(email, password)
-                        .then(() => { alert("Account Created Securely!"); })
-                        .catch(e => alert(e.message));
+                        .then(res => {
+                            db.collection('users').doc(res.user.uid).set({ name: name, email: email });
+                            alert("MSB Secure Account Created!");
+                        })
+                        .catch(e => alert("Error: " + e.message));
                 } else {
                     alert("Error: " + error.message);
                 }
             });
     }
 
-    // Forgot Password System
     function forgotPassword() {
         const email = document.getElementById('email').value;
         if(!email) { alert("Please enter your email first"); return; }
@@ -87,10 +91,7 @@
             .catch(e => alert(e.message));
     }
 
-    // Auto-Update Logic
-    let currentVersion = "1.0"; 
-    // Jab aap code badlein, toh bas is 1.0 ko 1.1 kar dena, 
-    // sabke phone mein "Update Now" dikhne lagega.
+    let currentVersion = "1.0";
 </script>
 </body>
 </html>
