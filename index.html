@@ -1,18 +1,35 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUVRO PRO</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>QUVRO TEST</title>
+    <style>
+        body { background: #121b22; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+        .test-box { text-align: center; border: 1px solid #25d366; padding: 20px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>QUVRO SYSTEM CHECK</h1>
+        <p id="status">Scripts loading...</p>
+        <div id="recaptcha-container"></div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <style>
-        :root { --green: #075e54; --light: #25d366; --bg: #121b22; --panel: #1f2c34; }
-        body, html { margin: 0; padding: 0; font-family: sans-serif; background: var(--bg); color: white; height: 100%; overflow: hidden; }
+
+    <script>
+        alert("System Working!");
+        document.getElementById('status').innerText = "System Online. Agar login nahi dikhra toh Firebase Domain check karein.";
         
-        /* White Screen Fix & Auth */
-        #authScreen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; z-index: 1000; position: relative; }
-        .box { width: 85%; max-width: 350px; text-align: center; background: var(--panel); padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: none; color: white; border-radius: 5px; box-sizing: border-box; }
+        // Firebase Config
+        const cfg = {
+            apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg",
+            authDomain: "quvro-b3923.firebaseapp.com",
+            projectId: "quvro-b3923",
+            appId: "1:46528123402:web:9262edeb971f8f2b2405f3"
+        };
+        firebase.initializeApp(cfg);
+        console.log("Firebase Initialized");
+    </script>
+</body>
+</html>
