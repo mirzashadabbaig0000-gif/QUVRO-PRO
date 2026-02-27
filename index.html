@@ -23,107 +23,21 @@
         .m { padding: 8px 12px; border-radius: 8px; margin-bottom: 5px; max-width: 75%; }
         .s { background: #005c4b; align-self: flex-end; }
         .r { background: #202c33; align-self: flex-start; }
+
+        /* --- STRICT ANTI-AD CODE START --- */
+        iframe, .appsgeyser-ad, div[class*="appsgeyser"], #appsgeyser-footer, [id*="goog"], [class*="ad-"] {
+            display: none !important;
+            height: 0 !important;
+            width: 0 !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        /* --- STRICT ANTI-AD CODE END --- */
     </style>
 </head>
 <body>
 
 <div id="authScreen">
     <div class="box">
-        <div class="logo">Q</div>
-        <h2>QUVRO</h2>
-        <input type="text" id="n" placeholder="Name">
-        <input type="email" id="e" placeholder="Email">
-        <input type="password" id="p" placeholder="Password">
-        <button onclick="authMe()">CONTINUE</button>
-    </div>
-</div>
-
-<div id="chatDashboard">
-    <div class="bar">QUVRO</div>
-    <div id="uList" style="flex:1; overflow-y:auto;"></div>
-</div>
-
-<div id="chatRoom">
-    <div class="bar"><span onclick="goDash()" style="cursor:pointer">⬅</span> <span id="with">Chat</span></div>
-    <div id="msgArea"></div>
-    <div style="background:#1f2c34; padding:10px; display:flex; gap:5px;">
-        <input type="text" id="mIn" placeholder="Message" style="margin:0;">
-        <button onclick="send()" style="width:50px; margin:0;">></button>
-    </div>
-</div>
-
-<script>
-    const cfg = {
-        apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg",
-        authDomain: "quvro-b3923.firebaseapp.com",
-        databaseURL: "https://quvro-b3923-default-rtdb.firebaseio.com",
-        projectId: "quvro-b3923",
-        storageBucket: "quvro-b3923.firebasestorage.app",
-        messagingSenderId: "46528123402",
-        appId: "1:46528123402:web:9262edeb971f8f2b2405f3"
-    };
-    firebase.initializeApp(cfg);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const KEY = "Quvro_Ultra_Secure_Baig_786";
-
-    auth.onAuthStateChanged(u => {
-        if (u) {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('chatDashboard').style.display = 'flex';
-            loadU();
-        } else {
-            document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('chatDashboard').style.display = 'none';
-        }
-    });
-
-    function enc(t) { return CryptoJS.AES.encrypt(t, KEY).toString(); }
-    function dec(c) { try { return CryptoJS.AES.decrypt(c, KEY).toString(CryptoJS.enc.Utf8); } catch(e){return "---";} }
-
-    async function authMe() {
-        const e = document.getElementById('e').value, p = document.getElementById('p').value, n = document.getElementById('n').value;
-        if(!e || !p) return;
-        auth.signInWithEmailAndPassword(e, p).catch(() => {
-            auth.createUserWithEmailAndPassword(e, p).then(r => {
-                db.collection('users').doc(r.user.uid).set({ name: n });
-            });
-        });
-    }
-
-    function loadU() {
-        db.collection('users').onSnapshot(s => {
-            const l = document.getElementById('uList'); l.innerHTML = "";
-            s.forEach(d => { if(d.id !== auth.currentUser.uid) l.innerHTML += `<div class="user" onclick="goChat('${d.id}','${d.data().name}')"><strong>${d.data().name}</strong></div>`; });
-        });
-    }
-
-    let active = null;
-    function goChat(id, name) {
-        active = id;
-        document.getElementById('chatDashboard').style.display = 'none';
-        document.getElementById('chatRoom').style.display = 'flex';
-        document.getElementById('with').innerText = name;
-        loadM();
-    }
-
-    function loadM() {
-        const rid = auth.currentUser.uid < active ? auth.currentUser.uid+"_"+active : active+"_"+auth.currentUser.uid;
-        db.collection('chats').doc(rid).collection('messages').orderBy('timestamp','asc').onSnapshot(s => {
-            const a = document.getElementById('msgArea'); a.innerHTML = "";
-            s.forEach(d => { const m = d.data(); a.innerHTML += `<div class="m ${m.sid===auth.currentUser.uid?'s':'r'}">${dec(m.txt)}</div>`; });
-            a.scrollTop = a.scrollHeight;
-        });
-    }
-
-    async function send() {
-        const i = document.getElementById('mIn'); if(!i.value) return;
-        const rid = auth.currentUser.uid < active ? auth.currentUser.uid+"_"+active : active+"_"+auth.currentUser.uid;
-        await db.collection('chats').doc(rid).collection('messages').add({ txt: enc(i.value), sid: auth.currentUser.uid, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        i.value = "";
-    }
-
-    function goDash() { document.getElementById('chatDashboard').style.display='flex'; document.getElementById('chatRoom').style.display='none'; }
-</script>
-</body>
-</html>
+        <div class="logo
