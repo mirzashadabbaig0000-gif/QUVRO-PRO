@@ -11,6 +11,23 @@
     <style>
         :root { --green: #075e54; --light: #25d366; --bg: #121b22; --panel: #1f2c34; }
         body, html { margin: 0; padding: 0; font-family: sans-serif; background: var(--bg); color: white; height: 100%; overflow: hidden; }
+        
+        /* Download Button Styling */
+        .download-link {
+            display: inline-block;
+            background: #ffffff;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 20px;
+            border: 2px solid var(--light);
+            transition: 0.3s;
+        }
+        .download-link:hover { background: var(--light); }
+
         #authScreen { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
         .box { width: 85%; max-width: 350px; text-align: center; background: var(--panel); padding: 30px; border-radius: 15px; border: 1px solid #2a3942; }
         input { width: 100%; padding: 12px; margin: 8px 0; background: #2a3942; border: none; color: white; border-radius: 5px; box-sizing: border-box; outline: none; }
@@ -29,6 +46,9 @@
 <body>
 
 <div id="authScreen">
+    <a href="QUVRO.apk" download="QUVRO-PRO.apk" class="download-link">
+        📥 DOWNLOAD QUVRO APP
+    </a>
     <div class="box">
         <h2 style="color: var(--light);">QUVRO PRO</h2>
         <div id="loginStep">
@@ -46,7 +66,7 @@
 
 <div id="mainContainer">
     <div id="tab-chats" style="display: flex; flex-direction: column; height: 100%;">
-        <div class="bar">QUVRO PRO <small onclick="auth.signOut()" style="color:red;">Logout</small></div>
+        <div class="bar">QUVRO PRO <small onclick="auth.signOut()" style="color:red; cursor:pointer;">Logout</small></div>
         <div style="padding:10px; display: flex; gap: 5px;">
             <input type="text" id="searchPh" placeholder="Search Number (+91...)" style="margin:0;">
             <button onclick="searchUser()" style="width: 80px; margin:0;">FIND</button>
@@ -71,6 +91,8 @@
 </div>
 
 <script>
+    // Aapka wahi Firebase script jo upar tha...
+    // (Pura script waisa hi rakhein jo aapne pehle likha hai)
     const cfg = {
         apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg",
         authDomain: "quvro-b3923.firebaseapp.com",
@@ -99,8 +121,7 @@
     let confirmation;
     function sendOTP() {
         let ph = document.getElementById('uPhone').value.trim();
-        if(!ph.startsWith('+')) ph = '+91' + ph; // Auto-add India code if missing
-        
+        if(!ph.startsWith('+')) ph = '+91' + ph;
         auth.signInWithPhoneNumber(ph, window.recaptchaVerifier).then(res => {
             confirmation = res;
             document.getElementById('loginStep').style.display='none';
@@ -112,7 +133,6 @@
         const code = document.getElementById('uOTP').value;
         const name = document.getElementById('uName').value;
         const ph = document.getElementById('uPhone').value.startsWith('+') ? document.getElementById('uPhone').value : '+91'+document.getElementById('uPhone').value;
-
         confirmation.confirm(code).then(res => {
             db.collection('users').doc(res.user.uid).set({ name: name, phone: ph });
         }).catch(e => alert("Galat OTP!"));
@@ -121,10 +141,9 @@
     async function searchUser() {
         let ph = document.getElementById('searchPh').value.trim();
         if(!ph.startsWith('+')) ph = '+91' + ph;
-
         const snap = await db.collection('users').where("phone", "==", ph).get();
         const list = document.getElementById('uList'); list.innerHTML = "";
-        if(snap.empty) return alert("User nahi mila! Kya unhone app register ki hai?");
+        if(snap.empty) return alert("User nahi mila!");
         snap.forEach(d => {
             list.innerHTML += `<div style="padding:15px; border-bottom:1px solid #222; background:#1f2c34; margin:5px; border-radius:10px;" onclick="openChat('${d.id}','${d.data().name}')"><strong>${d.data().name}</strong><br><small>${d.data().phone}</small></div>`;
         });
