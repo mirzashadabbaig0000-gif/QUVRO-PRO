@@ -2,201 +2,132 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUVRO - Messaging App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QUVRO | Mirza Shadab Baig</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .auth-container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-        .auth-container h1 {
-            color: #333;
-            margin-bottom: 5px;
-            font-size: 28px;
-        }
-        .auth-container p {
-            color: #777;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: #764ba2;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .btn:hover {
-            background: #5e3b82;
-        }
-        .toggle-text {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #555;
-        }
-        .toggle-text span {
-            color: #764ba2;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        #errorMsg {
-            color: red;
-            font-size: 13px;
-            margin-top: 10px;
-            display: none;
-        }
+        :root { --gold: #FFD700; --bg: #0a0e17; --panel: #141c2b; --txt: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--bg); color: var(--txt); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        #splash { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.5s; }
+        .q-logo { width: 110px; height: 110px; border: 3px solid var(--gold); border-radius: 25px; display: flex; align-items: center; justify-content: center; font-size: 55px; font-weight: bold; color: var(--gold); box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); }
+        #app { display: none; height: 100vh; flex-direction: column; }
+        .header { background: var(--panel); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,215,0,0.2); }
+        .chat-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: radial-gradient(circle at center, #0f1520 0%, var(--bg) 100%); }
+        .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 15px; word-wrap: break-word; }
+        .sent { align-self: flex-end; background: var(--gold); color: #000; font-weight: 500; border-bottom-right-radius: 4px; }
+        .input-area { padding: 15px; background: var(--panel); display: flex; gap: 10px; align-items: center; }
+        .input-box { flex: 1; background: #1c2638; border: 1px solid rgba(255,215,0,0.3); padding: 14px 20px; border-radius: 30px; color: white; outline: none; }
+        .send-btn { background: var(--gold); border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 20px; cursor: pointer; color: #000; font-weight: bold; }
+        #admin { display: none; position: fixed; inset: 0; background: rgba(10, 14, 23, 0.95); backdrop-filter: blur(10px); z-index: 10000; padding: 30px; }
+        .admin-box { background: var(--panel); border: 2px solid var(--gold); border-radius: 20px; padding: 30px; max-width: 400px; margin: 40px auto; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="auth-container">
-        <h1>QUVRO</h1>
-        <p id="subText">Create an account to start chatting</p>
-
-        <div class="input-group" id="nameGroup">
-            <input type="text" id="userName" placeholder="Full Name">
-        </div>
-        <div class="input-group">
-            <input type="email" id="userEmail" placeholder="Email Address">
-        </div>
-        <div class="input-group">
-            <input type="password" id="userPass" placeholder="Password (Min 6 chars)">
-        </div>
-
-        <button class="btn" id="actionBtn" onclick="handleAuth()">Sign Up</button>
-        <p id="errorMsg"></p>
-
-        <p class="toggle-text" id="toggleText">
-            Already have an account? <span onclick="toggleMode()">Log In</span>
-        </p>
+    <div id="splash">
+        <div class="q-logo">Q</div>
+        <h1 style="color:var(--gold); margin-top:25px; letter-spacing:8px;">QUVRO</h1>
+        <p style="color:#555; margin-top: 10px;">Mirza Shadab Baig Edition</p>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <div id="app">
+        <div class="header">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="q-logo" style="width:40px; height:40px; font-size:20px; border-width:2px; border-radius:10px;">Q</div>
+                <div><b style="color:var(--gold);">QUVRO Network</b><br><small id="status" style="color:orange;">Connecting...</small></div>
+            </div>
+            </div>
+        
+        <div class="chat-area" id="box"></div>
+        
+        <div class="input-area">
+            <input type="text" id="in" class="input-box" placeholder="Type a secure message...">
+            <button onclick="sendMsg()" class="send-btn">➤</button>
+        </div>
+    </div>
+
+    <div id="admin">
+        <div class="admin-box">
+            <h2 style="color:var(--gold); margin-bottom: 20px;">MASTER CONSOLE</h2>
+            <p style="color:#fff; margin-bottom: 20px;">Owner: <span style="color:var(--gold)">Mirza Shadab Baig</span></p>
+            <button onclick="clearChat()" style="background:#ff3333; color:white; padding:12px; border:none; width:100%; border-radius:8px; font-weight:bold; margin-bottom: 15px; cursor: pointer;">🚨 Nuclear Chat Wipe</button>
+            <button onclick="document.getElementById('admin').style.display='none'" style="background:var(--gold); color:#000; padding:12px; border:none; width:100%; border-radius:8px; font-weight:bold; cursor: pointer;">Close</button>
+        </div>
+    </div>
 
     <script>
-        // Aapki QUVRO Config
         const firebaseConfig = {
             apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg",
             authDomain: "quvro-b3923.firebaseapp.com",
-            databaseURL: "https://quvro-b3923-default-rtdb.firebaseio.com",
             projectId: "quvro-b3923",
             storageBucket: "quvro-b3923.firebasestorage.app",
             messagingSenderId: "46528123402",
-            appId: "1:46528123402:web:9262edeb971f8f2b2405f3"
+            appId: "1:46528123402:web:9262edeb971f8f2b2405f3",
+            databaseURL: "https://quvro-b3923-default-rtdb.firebaseio.com"
         };
 
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const db = firebase.database();
 
-        let isLoginMode = false; // Default Signup mode hai
-
-        // UI Toggle logic (Signup se Login switch karne ke liye)
-        function toggleMode() {
-            isLoginMode = !isLoginMode;
-            const nameGroup = document.getElementById('nameGroup');
-            const actionBtn = document.getElementById('actionBtn');
-            const toggleText = document.getElementById('toggleText');
-            const subText = document.getElementById('subText');
-            const errorMsg = document.getElementById('errorMsg');
-
-            errorMsg.style.display = 'none'; // Error hata do switch karne par
-
-            if (isLoginMode) {
-                nameGroup.style.display = 'none';
-                actionBtn.innerText = 'Log In';
-                subText.innerText = 'Welcome back! Log in to continue';
-                toggleText.innerHTML = 'Don\'t have an account? <span onclick="toggleMode()">Sign Up</span>';
+        db.ref(".info/connected").on("value", (snap) => {
+            const statusEl = document.getElementById('status');
+            if(snap.val() === true) {
+                statusEl.innerText = "● Online (Encrypted)";
+                statusEl.style.color = "#00ffcc";
             } else {
-                nameGroup.style.display = 'block';
-                actionBtn.innerText = 'Sign Up';
-                subText.innerText = 'Create an account to start chatting';
-                toggleText.innerHTML = 'Already have an account? <span onclick="toggleMode()">Log In</span>';
+                statusEl.innerText = "● Offline";
+                statusEl.style.color = "#ff4444";
+            }
+        });
+
+        setTimeout(() => { 
+            document.getElementById('splash').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+        }, 2000);
+
+        // KHUFIYA DARWAZA LOGIC
+        function sendMsg() {
+            let input = document.getElementById('in');
+            let text = input.value.trim();
+
+            // Check for secret password: "Aap"
+            if(text === "Aap") {
+                document.getElementById('admin').style.display = 'block';
+                input.value = ""; 
+                return; 
+            }
+
+            if(text !== ""){
+                let msgId = Date.now();
+                db.ref("quvro_chats/" + msgId).set({
+                    text: text,
+                    time: msgId
+                });
+                input.value = "";
             }
         }
 
-        // Main Authentication Logic (Signup & Login)
-        async function handleAuth() {
-            const email = document.getElementById('userEmail').value.trim();
-            const pass = document.getElementById('userPass').value;
-            const name = document.getElementById('userName').value.trim();
-            const errorMsg = document.getElementById('errorMsg');
+        db.ref("quvro_chats").on("child_added", (data) => {
+            let msg = data.val();
+            let div = document.createElement('div');
+            div.className = "msg sent"; 
+            div.innerText = msg.text;
+            document.getElementById('box').appendChild(div);
+            document.getElementById('box').scrollTop = document.getElementById('box').scrollHeight;
+        });
 
-            if (!email || !pass) {
-                showError("Email and Password are required!");
-                return;
-            }
-
-            try {
-                if (isLoginMode) {
-                    // Login
-                    await auth.signInWithEmailAndPassword(email, pass);
-                    alert("Login Successful! (Next step: Chat screen)");
-                    // Yahan hum aage chal kar chat screen par bhejne ka code likhenge
-                } else {
-                    // Signup
-                    if (!name) {
-                        showError("Please enter your Full Name.");
-                        return;
-                    }
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, pass);
-                    const user = userCredential.user;
-
-                    // 🔴 SABSE ZAROORI STEP: Naye user ka data Firestore me save karna
-                    // Taki ye aapke Master Console me dikhe!
-                    await db.collection('users').doc(user.uid).set({
-                        name: name,
-                        email: email,
-                        isBanned: false, // Default banned nahi hoga
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-
-                    alert("Account Created Successfully! Welcome to QUVRO.");
-                    // Yahan hum chat screen par bhejne ka code likhenge
-                }
-            } catch (error) {
-                showError(error.message);
+        function clearChat() {
+            if(confirm("Confirm Nuclear Wipe?")) {
+                db.ref("quvro_chats").remove();
+                document.getElementById('box').innerHTML = "";
+                document.getElementById('admin').style.display = 'none';
             }
         }
-
-        function showError(msg) {
-            const errorMsg = document.getElementById('errorMsg');
-            errorMsg.innerText = msg;
-            errorMsg.style.display = 'block';
-        }
+        document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
