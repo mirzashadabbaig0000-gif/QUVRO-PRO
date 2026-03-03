@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUVRO - Private Messenger</title>
-    <!-- Font Awesome -->
+    <title>QUVRO - Next Generation Messenger</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
@@ -14,361 +20,310 @@
         }
 
         :root {
-            --primary: #075e54;      /* QUVRO green - signature color */
-            --primary-light: #128C7E;
-            --secondary: #25D366;
-            --bg-light: #ffffff;
-            --bg-gray: #f0f2f4;
-            --text-dark: #303030;
-            --text-soft: #667781;
-            --border-light: #e9edef;
+            --quvro-primary: #075e54;
+            --quvro-secondary: #128C7E;
+            --quvro-accent: #25D366;
+            --quvro-dark: #111b21;
+            --quvro-card: #1f2c34;
+            --quvro-input: #2a3942;
+            --quvro-text: #e9edef;
+            --quvro-text-soft: #8696a0;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(145deg, #0b3b2f 0%, #075e54 100%);
+            background: var(--quvro-dark);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 0;
             margin: 0;
-            padding: 15px;
         }
 
-        /* Main Container */
-        .quvro-container {
-            max-width: 420px;
+        /* QUVRO Main Container */
+        #quvroApp {
             width: 100%;
-            background: white;
-            border-radius: 32px 32px 24px 24px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* QUVRO Header */
-        .quvro-header {
-            background: var(--primary);
-            padding: 32px 24px 40px;
-            color: white;
-            text-align: center;
+            max-width: 450px;
+            height: 100vh;
+            background: var(--quvro-dark);
             position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
         }
 
-        .quvro-logo {
-            width: 80px;
-            height: 80px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 28px;
+        /* Screen Container */
+        .quvro-screen {
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background: var(--quvro-dark);
+        }
+
+        .quvro-screen.active {
+            display: flex;
+        }
+
+        /* ========== AUTH SCREEN ========== */
+        #authScreen {
+            background: linear-gradient(145deg, #075e54 0%, #064e45 100%);
+        }
+
+        .auth-header {
+            padding: 40px 20px 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .auth-logo {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 18px;
-            font-size: 48px;
+            margin: 0 auto 20px;
+            font-size: 60px;
             font-weight: bold;
-            color: white;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
-        .quvro-title {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 6px;
+        .auth-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
             letter-spacing: 1px;
         }
 
-        .quvro-tagline {
-            font-size: 15px;
-            opacity: 0.9;
+        .auth-badge {
             display: flex;
-            align-items: center;
+            gap: 20px;
             justify-content: center;
-            gap: 12px;
+            font-size: 14px;
+            opacity: 0.9;
         }
 
-        .quvro-tagline span {
+        .auth-badge span {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
-        .quvro-tagline i {
-            font-size: 12px;
-        }
-
-        /* Wave Shape */
-        .wave-shape {
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 100%;
-            height: 30px;
-            background: white;
-            border-radius: 30px 30px 0 0;
-        }
-
-        /* Tab Section */
-        .tab-section {
+        /* Auth Tabs */
+        .auth-tabs {
             display: flex;
-            padding: 20px 20px 0;
-            background: white;
-            gap: 15px;
+            background: var(--quvro-card);
+            margin: 20px 20px 0;
+            border-radius: 15px;
+            padding: 5px;
         }
 
-        .tab-button {
+        .auth-tab {
             flex: 1;
             text-align: center;
-            padding: 16px 10px;
+            padding: 15px;
             font-weight: 600;
-            color: var(--text-soft);
+            color: var(--quvro-text-soft);
             cursor: pointer;
-            border-bottom: 3px solid transparent;
+            border-radius: 12px;
             transition: all 0.2s;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
-        .tab-button.active {
-            color: var(--primary);
-            border-bottom-color: var(--secondary);
+        .auth-tab.active {
+            background: var(--quvro-primary);
+            color: white;
         }
 
-        /* Form Area */
-        .form-area {
-            padding: 10px 24px 24px;
-            background: white;
-        }
-
-        /* Input Groups */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 13px;
-            color: var(--text-soft);
-            margin-bottom: 6px;
-            font-weight: 500;
+        /* Auth Forms */
+        .auth-form {
+            flex: 1;
+            padding: 20px;
+            background: var(--quvro-dark);
+            border-radius: 30px 30px 0 0;
+            margin-top: 10px;
         }
 
         .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: block;
+            color: var(--quvro-text-soft);
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            color: var(--quvro-text-soft);
+            font-size: 18px;
+        }
+
+        .input-wrapper input,
+        .input-wrapper select {
             width: 100%;
-            padding: 16px 16px;
-            border: 1.5px solid var(--border-light);
-            border-radius: 16px;
+            padding: 16px 16px 16px 45px;
+            background: var(--quvro-input);
+            border: 1px solid #3b4a54;
+            border-radius: 15px;
+            color: var(--quvro-text);
             font-size: 16px;
             outline: none;
             transition: all 0.2s;
-            background: #fafafa;
         }
 
-        .input-field:focus {
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(7, 94, 84, 0.1);
-        }
-
-        /* Phone Input */
-        .phone-container {
-            display: flex;
-            gap: 10px;
-        }
-
-        .country-dropdown {
-            width: 100px;
-            padding: 16px 10px;
-            border: 1.5px solid var(--border-light);
-            border-radius: 16px;
-            background: #fafafa;
-            font-size: 16px;
-            outline: none;
-        }
-
-        /* Password Field with Eye */
-        .password-wrapper {
-            position: relative;
+        .input-wrapper input:focus {
+            border-color: var(--quvro-accent);
+            background: #304550;
         }
 
         .password-toggle {
             position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-soft);
+            right: 15px;
             cursor: pointer;
-            font-size: 20px;
+            color: var(--quvro-text-soft);
+        }
+
+        /* Phone Group */
+        .phone-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .country-code {
+            width: 100px;
+            padding: 16px;
+            background: var(--quvro-input);
+            border: 1px solid #3b4a54;
+            border-radius: 15px;
+            color: var(--quvro-text);
+            font-size: 16px;
+            outline: none;
         }
 
         /* Action Button */
-        .quvro-button {
+        .quvro-btn {
             width: 100%;
             padding: 18px;
-            background: var(--secondary);
+            background: var(--quvro-accent);
             border: none;
             border-radius: 30px;
             font-size: 17px;
             font-weight: 600;
             color: #111;
             cursor: pointer;
-            margin: 25px 0 18px;
+            margin: 25px 0 15px;
             transition: all 0.2s;
-            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
-        .quvro-button:active {
+        .quvro-btn:active {
             transform: scale(0.97);
         }
 
         /* Links */
-        .links-row {
+        .auth-links {
             display: flex;
             justify-content: space-between;
             margin: 15px 0;
-            padding: 0 5px;
+            color: var(--quvro-text-soft);
         }
 
-        .links-row a {
-            color: var(--primary);
+        .auth-links a {
+            color: var(--quvro-accent);
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* OR Divider */
-        .or-divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            color: var(--text-soft);
-            font-size: 13px;
-            margin: 25px 0;
-        }
-
-        .or-divider::before,
-        .or-divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .or-divider span {
-            margin: 0 15px;
+            cursor: pointer;
         }
 
         /* QR Option */
-        .qr-connect {
-            background: #f8f9fa;
+        .qr-option {
+            background: var(--quvro-card);
             border-radius: 20px;
-            padding: 18px;
+            padding: 20px;
             display: flex;
             align-items: center;
             gap: 15px;
+            margin-top: 20px;
             cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--border-light);
-        }
-
-        .qr-connect:hover {
-            background: #f0f2f4;
         }
 
         .qr-icon {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 16px;
+            width: 55px;
+            height: 55px;
+            background: var(--quvro-primary);
+            border-radius: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 28px;
-            color: var(--primary);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            color: white;
         }
 
         .qr-text h4 {
-            color: var(--text-dark);
-            margin-bottom: 4px;
-            font-size: 15px;
+            color: var(--quvro-text);
+            margin-bottom: 5px;
         }
 
         .qr-text p {
-            color: var(--text-soft);
+            color: var(--quvro-text-soft);
             font-size: 13px;
         }
 
-        /* Terms */
-        .terms-footer {
-            text-align: center;
-            padding: 20px 0 5px;
-            font-size: 12px;
-            color: var(--text-soft);
-            border-top: 1px solid var(--border-light);
-            margin-top: 20px;
-        }
-
-        .terms-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            margin: 0 5px;
-        }
-
         /* Message Popup */
-        .message-popup {
+        #messagePopup {
             position: fixed;
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 14px 25px;
-            border-radius: 40px;
-            background: white;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            padding: 15px 25px;
+            background: var(--quvro-card);
+            border-radius: 50px;
+            color: white;
             display: none;
             align-items: center;
             gap: 10px;
             z-index: 1000;
-            animation: slideTop 0.3s;
-            border-left: 4px solid var(--secondary);
-        }
-
-        @keyframes slideTop {
-            from { top: -100px; }
-            to { top: 20px; }
-        }
-
-        .message-popup i {
-            font-size: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-left: 4px solid var(--quvro-accent);
         }
 
         /* Loading */
-        .loading {
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
             display: none;
-            text-align: center;
-            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #e0e0e0;
-            border-top-color: var(--primary);
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2a3942;
+            border-top-color: var(--quvro-accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto;
         }
 
         @keyframes spin {
@@ -376,209 +331,178 @@
         }
 
         /* Responsive */
-        @media (max-width: 380px) {
-            .phone-container {
+        @media (max-width: 400px) {
+            .phone-group {
                 flex-direction: column;
             }
-            .country-dropdown {
+            .country-code {
                 width: 100%;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Message Popup -->
-    <div id="messagePopup" class="message-popup">
-        <i id="popupIcon" class="fas fa-check-circle" style="color: #25D366;"></i>
-        <span id="popupText">Message here</span>
-    </div>
-
-    <div class="quvro-container">
-        <!-- Header -->
-        <div class="quvro-header">
-            <div class="quvro-logo">
-                <i class="fas fa-comment"></i>
-            </div>
-            <div class="quvro-title">QUVRO</div>
-            <div class="quvro-tagline">
-                <span><i class="fas fa-shield-alt"></i> Secure</span>
-                <span><i class="fas fa-lock"></i> Private</span>
-                <span><i class="fas fa-bolt"></i> Fast</span>
-            </div>
-            <div class="wave-shape"></div>
+    <div id="quvroApp">
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay">
+            <div class="loading-spinner"></div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tab-section">
-            <div class="tab-button active" id="loginTab" onclick="showPanel('login')">
-                <i class="fas fa-arrow-right-to-bracket"></i> Login
-            </div>
-            <div class="tab-button" id="signupTab" onclick="showPanel('signup')">
-                <i class="fas fa-user-plus"></i> Register
-            </div>
+        <!-- Message Popup -->
+        <div id="messagePopup">
+            <i id="popupIcon" class="fas fa-check-circle" style="color: #25D366;"></i>
+            <span id="popupText"></span>
         </div>
 
-        <!-- LOGIN PANEL -->
-        <div class="form-area" id="loginPanel">
-            <div class="input-group">
-                <div class="input-label">
-                    <i class="fas fa-envelope" style="margin-right: 5px;"></i> Email or Phone
+        <!-- AUTH SCREEN -->
+        <div id="authScreen" class="quvro-screen active">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-comment-dots"></i>
                 </div>
-                <input type="text" class="input-field" id="loginEmail" placeholder="Enter email or phone" value="user@quvro.com">
-            </div>
-
-            <div class="input-group">
-                <div class="input-label">
-                    <i class="fas fa-lock" style="margin-right: 5px;"></i> Password
-                </div>
-                <div class="password-wrapper">
-                    <input type="password" class="input-field" id="loginPassword" placeholder="Enter password" value="123456">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('loginPassword', this)"></i>
+                <div class="auth-title">QUVRO</div>
+                <div class="auth-badge">
+                    <span><i class="fas fa-shield-alt"></i> Secure</span>
+                    <span><i class="fas fa-lock"></i> Private</span>
+                    <span><i class="fas fa-bolt"></i> Fast</span>
                 </div>
             </div>
 
-            <!-- Links Row -->
-            <div class="links-row">
-                <a href="#" onclick="forgotPassword()">
-                    <i class="fas fa-question-circle"></i> Forgot password?
-                </a>
-                <a href="#" onclick="showPanel('signup')">
-                    <i class="fas fa-user-plus"></i> Create account
-                </a>
-            </div>
-
-            <!-- Login Button -->
-            <button class="quvro-button" onclick="handleLogin()">
-                <span>Continue to QUVRO</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-
-            <!-- OR Divider -->
-            <div class="or-divider">
-                <span>OR</span>
-            </div>
-
-            <!-- QR Code Option -->
-            <div class="qr-connect" onclick="scanQR()">
-                <div class="qr-icon">
-                    <i class="fas fa-qrcode"></i>
+            <!-- Tabs -->
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Login
                 </div>
-                <div class="qr-text">
-                    <h4>Connect with QR code</h4>
-                    <p>Scan to login on other devices</p>
+                <div class="auth-tab" id="registerTab" onclick="switchAuthTab('register')">
+                    <i class="fas fa-user-plus"></i> Register
                 </div>
             </div>
 
-            <!-- Terms -->
-            <div class="terms-footer">
-                <i class="fas fa-lock" style="font-size: 10px;"></i> End-to-end encrypted
-                <br>
-                <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
-            </div>
-        </div>
+            <!-- LOGIN FORM -->
+            <div id="loginForm" class="auth-form">
+                <div class="input-field">
+                    <label><i class="fas fa-envelope"></i> Email or Phone</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="loginUsername" placeholder="Enter email or phone" value="demo@quvro.com">
+                    </div>
+                </div>
 
-        <!-- SIGNUP PANEL (Hidden by default) -->
-        <div class="form-area" id="signupPanel" style="display: none;">
-            <div class="input-group">
-                <div class="input-label">
-                    <i class="fas fa-user" style="margin-right: 5px;"></i> Full Name
+                <div class="input-field">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="loginPassword" placeholder="Enter password" value="123456">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('loginPassword', this)"></i>
+                    </div>
                 </div>
-                <input type="text" class="input-field" id="signupName" placeholder="Your name">
-            </div>
 
-            <div class="input-group">
-                <div class="input-label">
-                    <i class="fas fa-phone" style="margin-right: 5px;"></i> Phone Number
+                <div class="auth-links">
+                    <a onclick="forgotPassword()"><i class="fas fa-question-circle"></i> Forgot password?</a>
+                    <a onclick="switchAuthTab('register')"><i class="fas fa-user-plus"></i> Create account</a>
                 </div>
-                <div class="phone-container">
-                    <select class="country-dropdown" id="countryCode">
-                        <option value="+91">🇮🇳 +91</option>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+92">🇵🇰 +92</option>
-                        <option value="+971">🇦🇪 +971</option>
-                    </select>
-                    <input type="tel" class="input-field" id="signupPhone" placeholder="Phone number" style="flex:1;">
-                </div>
-            </div>
 
-            <div class="input-group">
-                <div class="input-label">
-                    <i class="fas fa-envelope" style="margin-right: 5px;"></i> Email (Optional)
-                </div>
-                <input type="email" class="input-field" id="signupEmail" placeholder="your@email.com">
-            </div>
+                <button class="quvro-btn" onclick="handleLogin()">
+                    <span>Continue to QUVRO</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
 
-            <div class="input-group">
-                <div class="input-label">
-                    <i class="fas fa-lock" style="margin-right: 5px;"></i> Password
-                </div>
-                <div class="password-wrapper">
-                    <input type="password" class="input-field" id="signupPassword" placeholder="Create password">
-                    <i class="fas fa-eye password-toggle" onclick="togglePassword('signupPassword', this)"></i>
+                <!-- QR Option -->
+                <div class="qr-option" onclick="showQR()">
+                    <div class="qr-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <div class="qr-text">
+                        <h4>Connect with QR code</h4>
+                        <p>Scan to login on other devices</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="terms-footer" style="margin: 10px 0;">
-                By signing up, you agree to our 
-                <a href="#">Terms</a> and <a href="#">Privacy Policy</a>
-            </div>
+            <!-- REGISTER FORM -->
+            <div id="registerForm" class="auth-form" style="display: none;">
+                <div class="input-field">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user-circle"></i>
+                        <input type="text" id="registerName" placeholder="Your name">
+                    </div>
+                </div>
 
-            <button class="quvro-button" onclick="handleSignup()">
-                <span>Create Account</span>
-                <i class="fas fa-user-plus"></i>
-            </button>
+                <div class="input-field">
+                    <label><i class="fas fa-phone"></i> Phone Number</label>
+                    <div class="phone-group">
+                        <select class="country-code" id="countryCode">
+                            <option value="+91">🇮🇳 +91</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+92">🇵🇰 +92</option>
+                            <option value="+971">🇦🇪 +971</option>
+                        </select>
+                        <div class="input-wrapper" style="flex:1;">
+                            <i class="fas fa-phone-alt"></i>
+                            <input type="tel" id="registerPhone" placeholder="Phone number">
+                        </div>
+                    </div>
+                </div>
 
-            <div style="text-align: center; margin-top: 20px;">
-                <a href="#" onclick="showPanel('login')" style="color: var(--primary);">
-                    <i class="fas fa-arrow-left"></i> Back to Login
-                </a>
+                <div class="input-field">
+                    <label><i class="fas fa-envelope"></i> Email (Optional)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="registerEmail" placeholder="your@email.com">
+                    </div>
+                </div>
+
+                <div class="input-field">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-key"></i>
+                        <input type="password" id="registerPassword" placeholder="Create password">
+                        <i class="fas fa-eye password-toggle" onclick="togglePassword('registerPassword', this)"></i>
+                    </div>
+                </div>
+
+                <div style="color: var(--quvro-text-soft); font-size: 12px; text-align: center; margin: 15px 0;">
+                    By signing up, you agree to our Terms and Privacy Policy
+                </div>
+
+                <button class="quvro-btn" onclick="handleRegister()">
+                    <span>Create QUVRO Account</span>
+                    <i class="fas fa-user-plus"></i>
+                </button>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <a onclick="switchAuthTab('login')" style="color: var(--quvro-accent); cursor: pointer;">
+                        <i class="fas fa-arrow-left"></i> Back to Login
+                    </a>
+                </div>
             </div>
         </div>
 
-        <!-- Loading Spinner -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 10px; color: var(--primary);">Processing...</p>
+        <!-- CHAT SCREEN (Will be shown after login) -->
+        <div id="chatScreen" class="quvro-screen">
+            <!-- Chat UI will go here -->
         </div>
     </div>
 
     <script>
-        // Show/Hide Panels
-        function showPanel(panel) {
-            const loginPanel = document.getElementById('loginPanel');
-            const signupPanel = document.getElementById('signupPanel');
-            const loginTab = document.getElementById('loginTab');
-            const signupTab = document.getElementById('signupTab');
-            
-            if(panel === 'login') {
-                loginPanel.style.display = 'block';
-                signupPanel.style.display = 'none';
-                loginTab.classList.add('active');
-                signupTab.classList.remove('active');
-            } else {
-                loginPanel.style.display = 'none';
-                signupPanel.style.display = 'block';
-                signupTab.classList.add('active');
-                loginTab.classList.remove('active');
-            }
-        }
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg",
+            authDomain: "quvro-b3923.firebaseapp.com",
+            projectId: "quvro-b3923",
+            storageBucket: "quvro-b3923.firebasestorage.app",
+            messagingSenderId: "46528123402",
+            appId: "1:46528123402:web:9262edeb971f8f2b2405f3"
+        };
 
-        // Toggle Password Visibility
-        function togglePassword(inputId, element) {
-            const input = document.getElementById(inputId);
-            if(input.type === 'password') {
-                input.type = 'text';
-                element.classList.remove('fa-eye');
-                element.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                element.classList.remove('fa-eye-slash');
-                element.classList.add('fa-eye');
-            }
-        }
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // Show Message
+        // ========== UI FUNCTIONS ==========
         function showMessage(text, type) {
             const popup = document.getElementById('messagePopup');
             const popupText = document.getElementById('popupText');
@@ -601,37 +525,81 @@
             }, 3000);
         }
 
-        // Handle Login
-        function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if(!email || !password) {
-                showMessage('Please enter email and password!', 'error');
-                return;
-            }
-            
-            document.getElementById('loading').style.display = 'block';
-            
-            setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-                showMessage('Login successful! Welcome to QUVRO', 'success');
-                
-                setTimeout(() => {
-                    // Yahan apna chat page link karo
-                    window.location.href = '#chat';
-                }, 1000);
-            }, 1500);
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
         }
 
-        // Handle Signup
-        function handleSignup() {
-            const name = document.getElementById('signupName').value;
-            const phone = document.getElementById('signupPhone').value;
-            const password = document.getElementById('signupPassword').value;
+        function togglePassword(inputId, element) {
+            const input = document.getElementById(inputId);
+            if(input.type === 'password') {
+                input.type = 'text';
+                element.classList.remove('fa-eye');
+                element.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                element.classList.remove('fa-eye-slash');
+                element.classList.add('fa-eye');
+            }
+        }
+
+        // ========== AUTH FUNCTIONS ==========
+        function switchAuthTab(tab) {
+            const loginTab = document.getElementById('loginTab');
+            const registerTab = document.getElementById('registerTab');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
             
-            if(!name || !phone || !password) {
-                showMessage('Name, Phone and Password required!', 'error');
+            if(tab === 'login') {
+                loginTab.classList.add('active');
+                registerTab.classList.remove('active');
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                registerTab.classList.add('active');
+                loginTab.classList.remove('active');
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            }
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if(!username || !password) {
+                showMessage('Please enter all fields!', 'error');
                 return;
             }
-       
+            
+            showLoading(true);
+            
+            try {
+                // Check if username is email or phone
+                const isEmail = username.includes('@');
+                
+                if(isEmail) {
+                    // Login with email
+                    await auth.signInWithEmailAndPassword(username, password);
+                } else {
+                    // Login with phone - you'll need to implement phone auth
+                    showMessage('Phone login coming soon!', 'success');
+                    showLoading(false);
+                    return;
+                }
+                
+                showMessage('Login successful!', 'success');
+                
+                setTimeout(() => {
+                    // Redirect to chat
+                    document.getElementById('authScreen').classList.remove('active');
+                    document.getElementById('chatScreen').classList.add('active');
+                }, 1000);
+                
+            } catch(error) {
+                showMessage(error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function handl
