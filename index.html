@@ -2,33 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#161b22">
-    <title>QUVRO PRO</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    
-    <style>
-        :root { 
-            --y: #FFD700; /* Yellow */
-            --c: #00FFFF; /* Cyan */
-            --bg: #0d1117; /* Dark Background */
-            --box: #161b22; /* Box Background */
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-        
-        /* Strict Body Lock */
-        body, html { 
-            background: var(--bg); color: white; overflow: hidden; 
-            position: fixed; width: 100%; height: 100%; top: 0; left: 0;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quvra - Chat App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div id="loginSection" class="login-section">
+            <div class="login-card">
+                <div class="logo">
+                    <i class="fas fa-comment-dots"></i>
+                    <h1>Quvra</h1>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-phone-alt"></i>
+                    <input type="text" id="phoneNumber" placeholder="Phone Number" maxlength="10">
+                </div>
+                <button onclick="sendOtp()" class="login-btn">Get OTP</button>
+                <p class="terms">By continuing, you agree to our Terms & Privacy Policy</p>
+            </div>
+        </div>
 
-        #app-container { display: flex; flex-direction: column; width: 100%; height: 100%; }
-        .screen { display: none; flex-direction: column; height: 100%; width: 100%; }
-        .screen.active { display: flex; }
+        <!-- Main App Section (Initially Hidden) -->
+        <div id="mainApp" class="main-app" style="display: none;">
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Quvra</h2>
+                    <div class="header-icons">
+                        <i class="fas fa-circle-notch"></i>
+                        <i class="fas fa-edit" onclick="showContacts()"></i>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search chats...">
+                </div>
 
-        /* Modern UI */
-        .header { background: var(--box); padding: 15px; display: flex; align-items: center; gap: 12px; border-bottom: 1px
+                <!-- Chats List -->
+                <div class="chats-list" id="chatsList">
+                    <!-- Chats will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area" id="chatArea">
+                <div class="chat-placeholder" id="chatPlaceholder">
+                    <i class="fas fa-comment-dots"></i>
+                    <h3>Welcome to Quvra</h3>
+                    <p>Select a chat to start messaging</p>
+                </div>
+
+                <!-- Active Chat (Initially Hidden) -->
+                <div class="active-chat" id="activeChat" style="display: none;">
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <div class="user-avatar" id="chatUserAvatar">R</div>
+                            <div>
+                                <h3 id="chatUserName">Rahul Sharma</h3>
+                                <span class="online-status" id="userStatus">online</span>
+                            </div>
+                        </div>
+                        <div class="chat-header-icons">
+                            <i class="fas fa-phone-alt"></i>
+                            <i class="fas fa-video"></i>
+                            <i class="fas fa-ellipsis-v"></i>
+                        </div>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div class="messages-container" id="messagesContainer">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <!-- Message Input -->
+                    <div class="message-input-container">
+                        <div class="input-wrapper">
+                            <i class="fas fa-smile"></i>
+                            <i class="fas fa-paperclip"></i>
+                            <input type="text" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                            <button onclick="sendMessage()" class="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contacts Modal -->
+        <div id="contactsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>New Chat</h3>
+                    <i class="fas fa-times" onclick="closeModal()"></i>
+                </div>
+                <div class="modal-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search contacts...">
+                </div>
+                <div class="contacts-list" id="contactsList">
+                    <!-- Contacts will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
