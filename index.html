@@ -3,285 +3,550 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QUVRO - Secure Chat</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <title>QUVRO - Secure Messenger</title>
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Encryption Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
-        :root { 
-            --green: #075e54; 
-            --light: #25d366; 
-            --bg: #121b22; 
-            --dark: #1f2c34;
-            --darker: #0b141a;
+
+        :root {
+            --primary: #075e54;
+            --primary-light: #128C7E;
+            --secondary: #25D366;
+            --bg-dark: #111b21;
+            --bg-card: #1f2c34;
+            --bg-input: #2a3942;
+            --text-primary: #e9edef;
+            --text-secondary: #8696a0;
+            --message-sent: #005c4b;
+            --message-received: #202c33;
         }
-        
-        body, html { 
-            margin: 0; 
-            padding: 0; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: var(--bg); 
-            color: white; 
-            height: 100%; 
-            overflow: hidden; 
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            height: 100%;
+            overflow: hidden;
         }
-        
-        /* Auth Screen */
-        #authScreen { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            background: linear-gradient(135deg, #075e54 0%, #128C7E 100%);
+
+        /* ========== AUTH SCREEN ========== */
+        #authScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(145deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            padding: 20px;
         }
-        
-        .box { 
-            width: 85%; 
-            max-width: 350px; 
-            text-align: center; 
-            background: var(--dark); 
-            padding: 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(31, 44, 52, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 30px 25px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(37, 211, 102, 0.2);
         }
-        
-        .logo { 
-            width: 70px; 
-            height: 70px; 
-            background: var(--green); 
-            border-radius: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            margin: 0 auto 20px; 
-            font-size: 40px; 
-            font-weight: bold; 
+
+        .app-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 45px;
+            font-weight: bold;
             color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
-        
-        h2 {
-            margin-bottom: 20px;
+
+        .app-name {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
             color: white;
         }
-        
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            margin: 8px 0; 
-            background: #2a3942; 
-            border: none; 
-            color: white; 
-            border-radius: 10px; 
-            box-sizing: border-box; 
-            outline: none; 
-            font-size: 16px;
+
+        .app-tagline {
+            text-align: center;
+            color: var(--secondary);
+            margin-bottom: 30px;
+            font-size: 14px;
+            letter-spacing: 1px;
         }
-        
-        input:focus {
-            border: 2px solid var(--light);
+
+        .input-group {
+            margin-bottom: 15px;
         }
-        
-        button { 
-            background: var(--light); 
-            color: #000; 
-            border: none; 
-            padding: 15px; 
-            border-radius: 10px; 
-            font-weight: bold; 
-            width: 100%; 
-            cursor: pointer; 
-            margin-top: 15px; 
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-input);
+            border: 1px solid #3b4a54;
+            border-radius: 12px;
+            color: white;
             font-size: 16px;
+            outline: none;
             transition: all 0.3s;
         }
-        
-        button:hover {
+
+        .input-group input:focus {
+            border-color: var(--secondary);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--secondary);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auth-btn:hover {
             background: #20b859;
-            transform: scale(1.02);
+            transform: translateY(-2px);
         }
-        
-        /* Dashboard */
-        #chatDashboard, #chatRoom { 
-            display: none; 
-            height: 100vh; 
-            flex-direction: column; 
-            background: var(--bg);
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
         }
-        
-        .bar { 
-            background: var(--dark); 
-            padding: 15px; 
-            font-weight: bold; 
+
+        .auth-switch span {
+            color: var(--secondary);
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* ========== DASHBOARD ========== */
+        #dashboardScreen {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            background: var(--bg-dark);
+        }
+
+        .dashboard-header {
+            background: var(--bg-card);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             border-bottom: 1px solid #2a3942;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        .header-actions i {
+            font-size: 22px;
+            margin-left: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .search-bar {
+            padding: 10px 15px;
+            background: var(--bg-card);
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--bg-input);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            outline: none;
+        }
+
+        .users-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 5px 0;
+        }
+
+        .user-item {
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
-        }
-        
-        .user { 
-            padding: 15px; 
-            border-bottom: 1px solid #2a3942; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
             cursor: pointer;
             transition: background 0.3s;
+            border-bottom: 1px solid #1f2c34;
         }
-        
-        .user:hover {
+
+        .user-item:hover {
             background: #1f2c34;
         }
-        
+
         .user-avatar {
-            width: 45px;
-            height: 45px;
-            background: var(--green);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             font-weight: bold;
-        }
-        
-        #msgArea { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            background: var(--darker); 
-            display: flex; 
-            flex-direction: column; 
-        }
-        
-        .message { 
-            padding: 10px 15px; 
-            border-radius: 10px; 
-            margin-bottom: 8px; 
-            max-width: 75%; 
-            word-wrap: break-word;
+            color: white;
             position: relative;
         }
-        
-        .message.sent { 
-            background: #005c4b; 
-            align-self: flex-end; 
-            border-bottom-right-radius: 0;
+
+        .online-status {
+            width: 12px;
+            height: 12px;
+            background: #4caf50;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid var(--bg-card);
         }
-        
-        .message.received { 
-            background: #202c33; 
-            align-self: flex-start; 
-            border-bottom-left-radius: 0;
+
+        .offline-status {
+            width: 12px;
+            height: 12px;
+            background: #9e9e9e;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border: 2px solid var(--bg-card);
         }
-        
-        .message small {
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* ========== CHAT SCREEN ========== */
+        #chatScreen {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+            background: var(--bg-dark);
+            position: relative;
+        }
+
+        .chat-header {
+            background: var(--bg-card);
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #2a3942;
+        }
+
+        .back-btn {
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        .chat-user-info {
+            flex: 1;
+        }
+
+        .chat-user-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .chat-user-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .chat-actions i {
+            font-size: 22px;
+            margin-left: 15px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 15px;
+            background: #0b141a;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-wrapper {
+            margin-bottom: 8px;
+            max-width: 75%;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-sent {
+            align-self: flex-end;
+        }
+
+        .message-received {
+            align-self: flex-start;
+        }
+
+        .message-bubble {
+            padding: 10px 15px;
+            border-radius: 12px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message-sent .message-bubble {
+            background: var(--message-sent);
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-received .message-bubble {
+            background: var(--message-received);
+            border-bottom-left-radius: 2px;
+        }
+
+        .message-time {
             font-size: 10px;
-            opacity: 0.7;
-            margin-left: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 3px;
+            text-align: right;
         }
-        
-        .input-area {
-            background: var(--dark);
+
+        .encrypted-badge {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-left: 5px;
+        }
+
+        .message-input-area {
+            background: var(--bg-card);
             padding: 15px;
             display: flex;
             gap: 10px;
+            align-items: center;
         }
-        
-        #mIn {
+
+        .message-input-area input {
             flex: 1;
-            margin: 0;
-            padding: 12px 15px;
+            padding: 12px 20px;
+            background: var(--bg-input);
+            border: none;
             border-radius: 25px;
+            color: white;
+            outline: none;
+            font-size: 15px;
         }
-        
-        #sendBtn {
+
+        .send-btn {
             width: 50px;
             height: 50px;
+            background: var(--secondary);
+            border: none;
             border-radius: 50%;
-            padding: 0;
+            color: #000;
             font-size: 20px;
-            margin: 0;
-        }
-        
-        .back-btn {
             cursor: pointer;
-            font-size: 24px;
-            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
-        
-        #with {
-            font-weight: bold;
+
+        .send-btn:hover {
+            background: #20b859;
+            transform: scale(1.05);
         }
-        
-        .empty-state {
+
+        .send-btn:disabled {
+            background: #3b4a54;
+            cursor: not-allowed;
+        }
+
+        .welcome-message {
             text-align: center;
+            color: var(--text-secondary);
             padding: 50px 20px;
-            color: #8696a0;
         }
-        
-        .timestamp {
-            font-size: 10px;
-            opacity: 0.6;
-            margin-top: 4px;
+
+        .welcome-message i {
+            font-size: 60px;
+            color: var(--secondary);
+            margin-bottom: 20px;
         }
-        
-        .status-badge {
-            background: var(--light);
-            color: black;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            margin-left: 8px;
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #2a3942;
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-<!-- Auth Screen -->
+<!-- ========== AUTH SCREEN ========== -->
 <div id="authScreen">
-    <div class="box">
-        <div class="logo">Q</div>
-        <h2>QUVRO</h2>
-        <input type="text" id="nameInput" placeholder="Your Name" required>
-        <input type="email" id="emailInput" placeholder="Email" required>
-        <input type="password" id="passwordInput" placeholder="Password" required>
-        <button onclick="handleAuth()">CONTINUE →</button>
+    <div class="auth-container">
+        <div class="app-logo">
+            <i class="fas fa-comment"></i>
+        </div>
+        <div class="app-name">QUVRO</div>
+        <div class="app-tagline">Secure • Private • Fast</div>
+        
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="fullNameInput" placeholder="Enter your name">
+        </div>
+        
+        <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="emailInput" placeholder="Enter email">
+        </div>
+        
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="passwordInput" placeholder="••••••••">
+        </div>
+        
+        <button class="auth-btn" id="authBtn" onclick="handleAuth()">
+            <i class="fas fa-arrow-right"></i> Continue
+        </button>
+        
+        <div class="auth-switch">
+            <span id="authSwitchText" onclick="toggleAuthMode()">Create new account</span>
+        </div>
     </div>
 </div>
 
-<!-- Dashboard -->
-<div id="chatDashboard">
-    <div class="bar">
-        <span>📱 QUVRO</span>
-        <span style="margin-left:auto; font-size:14px;" id="userName"></span>
+<!-- ========== DASHBOARD SCREEN ========== -->
+<div id="dashboardScreen">
+    <div class="dashboard-header">
+        <div class="header-title">
+            <i class="fas fa-comment-dots"></i> QUVRO
+        </div>
+        <div class="header-actions">
+            <i class="fas fa-search" onclick="searchUser()"></i>
+            <i class="fas fa-ellipsis-v" onclick="showMenu()"></i>
+        </div>
     </div>
-    <div id="userList" style="flex:1; overflow-y:auto;"></div>
+    
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search users..." onkeyup="filterUsers()">
+    </div>
+    
+    <div class="users-container" id="usersList">
+        <div class="welcome-message">
+            <i class="fas fa-users"></i>
+            <h3>Welcome to QUVRO</h3>
+            <p>Connect with friends securely</p>
+            <div class="spinner"></div>
+        </div>
+    </div>
 </div>
 
-<!-- Chat Room -->
-<div id="chatRoom">
-    <div class="bar">
-        <span class="back-btn" onclick="goToDashboard()">←</span>
-        <span id="chatWith">Loading...</span>
+<!-- ========== CHAT SCREEN ========== -->
+<div id="chatScreen">
+    <div class="chat-header">
+        <i class="fas fa-arrow-left back-btn" onclick="closeChat()"></i>
+        <div class="user-avatar" id="chatAvatar">
+            <span id="chatAvatarText"></span>
+            <span id="chatOnlineStatus" class="online-status" style="display: none;"></span>
+            <span id="chatOfflineStatus" class="offline-status" style="display: none;"></span>
+        </div>
+        <div class="chat-user-info">
+            <div class="chat-user-name" id="chatUserName">Loading...</div>
+            <div class="chat-user-status" id="chatUserStatus">...</div>
+        </div>
+        <div class="chat-actions">
+            <i class="fas fa-phone-alt"></i>
+            <i class="fas fa-video"></i>
+            <i class="fas fa-ellipsis-v"></i>
+        </div>
     </div>
-    <div id="messageArea"></div>
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Type a message" autocomplete="off">
-        <button id="sendBtn" onclick="sendMessage()">➤</button>
+    
+    <div class="messages-container" id="messagesContainer">
+        <div class="welcome-message">
+            <i class="fas fa-lock"></i>
+            <h3>Messages are encrypted</h3>
+            <p>Say hello to your friend! 👋</p>
+        </div>
+    </div>
+    
+    <div class="message-input-area">
+        <i class="fas fa-smile" style="color: var(--text-secondary); font-size: 24px;"></i>
+        <i class="fas fa-paperclip" style="color: var(--text-secondary); font-size: 24px;"></i>
+        <input type="text" id="messageInput" placeholder="Type a message" onkeypress="handleKeyPress(event)">
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
     </div>
 </div>
 
 <script>
-    // ==================== FIREBASE CONFIG ====================
+    // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyDZUuVUkkzoR3xnMw08fowuPFhP36RlPrg",
         authDomain: "quvro-b3923.firebaseapp.com",
@@ -291,286 +556,124 @@
         messagingSenderId: "46528123402",
         appId: "1:46528123402:web:9262edeb971f8f2b2405f3"
     };
-    
+
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    // Encryption Key
-    const SECRET_KEY = "Quvro_Super_Secure_Key_2025";
+    // ========== ENCRYPTION SETUP ==========
+    const ENCRYPTION_KEY = "Quvro_Secure_Key_2025_$%^&*";
     
-    // Global Variables
-    let currentChatUserId = null;
-    let currentChatUserName = "";
-    let unsubscribeMessages = null;
-    
-    // ==================== ENCRYPTION ====================
     function encryptMessage(text) {
         try {
-            return CryptoJS.AES.encrypt(text, SECRET_KEY).toString();
-        } catch(e) {
-            console.error("Encryption error:", e);
+            return CryptoJS.AES.encrypt(text, ENCRYPTION_KEY).toString();
+        } catch (e) {
+            console.error("Encryption failed:", e);
             return text;
         }
     }
     
     function decryptMessage(encryptedText) {
         try {
-            const bytes = CryptoJS.AES.decrypt(encryptedText, SECRET_KEY);
-            const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-            return decrypted || "🔒 Encrypted message";
-        } catch(e) {
-            console.error("Decryption error:", e);
-            return "🔒 Cannot decrypt";
+            const bytes = CryptoJS.AES.decrypt(encryptedText, ENCRYPTION_KEY);
+            return bytes.toString(CryptoJS.enc.Utf8) || "🔒 Message";
+        } catch (e) {
+            console.error("Decryption failed:", e);
+            return "🔒 Message";
         }
     }
-    
-    // ==================== AUTH STATE ====================
+
+    // ========== GLOBAL VARIABLES ==========
+    let isLoginMode = true;
+    let currentChatUser = null;
+    let unsubscribeMessages = null;
+    let unsubscribeUsers = null;
+
+    // ========== AUTH STATE LISTENER ==========
     auth.onAuthStateChanged(async (user) => {
         if (user) {
-            // User is signed in
+            // User is logged in
             document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('chatDashboard').style.display = 'flex';
+            document.getElementById('dashboardScreen').style.display = 'flex';
             
-            // Get user name from Firestore
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                document.getElementById('userName').innerText = userDoc.data().name;
-            }
+            // Update user online status
+            await db.collection('users').doc(user.uid).update({
+                online: true,
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            });
             
+            // Load users
             loadUsers();
         } else {
-            // User is signed out
+            // User is logged out
             document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('chatDashboard').style.display = 'none';
-            document.getElementById('chatRoom').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('chatScreen').style.display = 'none';
             
-            // Cleanup message listener
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-                unsubscribeMessages = null;
-            }
+            // Cleanup listeners
+            if (unsubscribeUsers) unsubscribeUsers();
+            if (unsubscribeMessages) unsubscribeMessages();
         }
     });
-    
-    // ==================== AUTH HANDLER ====================
+
+    // ========== AUTH FUNCTIONS ==========
+    function toggleAuthMode() {
+        isLoginMode = !isLoginMode;
+        const btn = document.getElementById('authBtn');
+        const switchText = document.getElementById('authSwitchText');
+        
+        if (isLoginMode) {
+            btn.innerHTML = '<i class="fas fa-arrow-right"></i> Login';
+            switchText.innerText = 'Create new account';
+        } else {
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Sign Up';
+            switchText.innerText = 'Already have an account? Login';
+        }
+    }
+
     async function handleAuth() {
-        const name = document.getElementById('nameInput').value.trim();
+        const name = document.getElementById('fullNameInput').value.trim();
         const email = document.getElementById('emailInput').value.trim();
         const password = document.getElementById('passwordInput').value;
         
-        // Validation
-        if (!name || !email || !password) {
-            alert("❌ Please fill all fields!");
+        if (!email || !password) {
+            alert('Please fill all fields!');
             return;
         }
         
-        if (password.length < 6) {
-            alert("❌ Password must be at least 6 characters!");
+        if (!isLoginMode && !name) {
+            alert('Name is required for sign up!');
             return;
         }
         
         try {
-            // Try to sign in
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            console.log("Signed in:", userCredential.user.email);
-            
-        } catch (error) {
-            if (error.code === 'auth/user-not-found') {
-                // User doesn't exist - create new account
-                try {
-                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                    
-                    // Save user name to Firestore
-                    await db.collection('users').doc(userCredential.user.uid).set({
-                        name: name,
-                        email: email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        online: true
-                    });
-                    
-                    console.log("New account created!");
-                    
-                } catch (signUpError) {
-                    alert("Error creating account: " + signUpError.message);
-                }
+            if (isLoginMode) {
+                // LOGIN
+                await auth.signInWithEmailAndPassword(email, password);
             } else {
-                alert("Login Error: " + error.message);
-            }
-        }
-    }
-    
-    // ==================== LOAD USERS ====================
-    function loadUsers() {
-        db.collection('users').onSnapshot((snapshot) => {
-            const userList = document.getElementById('userList');
-            userList.innerHTML = '';
-            
-            let hasOtherUsers = false;
-            
-            snapshot.forEach((doc) => {
-                // Don't show current user
-                if (doc.id !== auth.currentUser.uid) {
-                    hasOtherUsers = true;
-                    const userData = doc.data();
-                    
-                    const userDiv = document.createElement('div');
-                    userDiv.className = 'user';
-                    userDiv.onclick = () => openChat(doc.id, userData.name);
-                    
-                    userDiv.innerHTML = `
-                        <div class="user-avatar">${userData.name.charAt(0).toUpperCase()}</div>
-                        <div style="flex:1">
-                            <div style="font-weight:bold; margin-bottom:5px;">${userData.name}</div>
-                            <div style="font-size:12px; color:#8696a0;">${userData.online ? '🟢 Online' : '⚪ Offline'}</div>
-                        </div>
-                    `;
-                    
-                    userList.appendChild(userDiv);
-                }
-            });
-            
-            if (!hasOtherUsers) {
-                userList.innerHTML = '<div class="empty-state">👥 No other users found<br><small>Share this app with friends!</small></div>';
-            }
-        });
-    }
-    
-    // ==================== OPEN CHAT ====================
-    function openChat(userId, userName) {
-        currentChatUserId = userId;
-        currentChatUserName = userName;
-        
-        document.getElementById('chatDashboard').style.display = 'none';
-        document.getElementById('chatRoom').style.display = 'flex';
-        document.getElementById('chatWith').innerText = userName;
-        
-        loadMessages(userId);
-    }
-    
-    // ==================== LOAD MESSAGES ====================
-    function loadMessages(otherUserId) {
-        // Cleanup previous listener
-        if (unsubscribeMessages) {
-            unsubscribeMessages();
-        }
-        
-        const currentUserId = auth.currentUser.uid;
-        
-        // Create chat room ID (sorted user IDs)
-        const chatRoomId = currentUserId < otherUserId 
-            ? currentUserId + '_' + otherUserId 
-            : otherUserId + '_' + currentUserId;
-        
-        // Listen for messages
-        unsubscribeMessages = db.collection('chats')
-            .doc(chatRoomId)
-            .collection('messages')
-            .orderBy('timestamp', 'asc')
-            .onSnapshot((snapshot) => {
-                const messageArea = document.getElementById('messageArea');
-                messageArea.innerHTML = '';
+                // SIGN UP
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 
-                if (snapshot.empty) {
-                    messageArea.innerHTML = '<div class="empty-state">💬 No messages yet<br><small>Say hello! 👋</small></div>';
-                    return;
-                }
-                
-                snapshot.forEach((doc) => {
-                    const msgData = doc.data();
-                    const messageClass = msgData.senderId === currentUserId ? 'sent' : 'received';
-                    
-                    // Decrypt message
-                    const decryptedText = decryptMessage(msgData.text);
-                    
-                    // Format time
-                    let timeStr = '';
-                    if (msgData.timestamp) {
-                        const date = msgData.timestamp.toDate();
-                        timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    }
-                    
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${messageClass}`;
-                    messageDiv.innerHTML = `
-                        <div>${decryptedText}</div>
-                        <div class="timestamp">${timeStr}</div>
-                    `;
-                    
-                    messageArea.appendChild(messageDiv);
+                // Save user data
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    online: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
-                // Scroll to bottom
-                messageArea.scrollTop = messageArea.scrollHeight;
-            });
-    }
-    
-    // ==================== SEND MESSAGE ====================
-    async function sendMessage() {
-        const messageInput = document.getElementById('messageInput');
-        const messageText = messageInput.value.trim();
-        
-        if (!messageText || !currentChatUserId) return;
-        
-        const currentUserId = auth.currentUser.uid;
-        
-        // Create chat room ID
-        const chatRoomId = currentUserId < currentChatUserId 
-            ? currentUserId + '_' + currentChatUserId 
-            : currentChatUserId + '_' + currentUserId;
-        
-        // Encrypt message
-        const encryptedText = encryptMessage(messageText);
-        
-        try {
-            await db.collection('chats')
-                .doc(chatRoomId)
-                .collection('messages')
-                .add({
-                    text: encryptedText,
-                    senderId: currentUserId,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-            
-            // Clear input
-            messageInput.value = '';
-            
+                alert('Account created successfully!');
+            }
         } catch (error) {
-            console.error("Error sending message:", error);
-            alert("Failed to send message!");
+            alert(error.message);
         }
     }
-    
-    // ==================== GO TO DASHBOARD ====================
-    function goToDashboard() {
-        document.getElementById('chatDashboard').style.display = 'flex';
-        document.getElementById('chatRoom').style.display = 'none';
+
+    // ========== LOAD USERS ==========
+    function loadUsers() {
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
         
-        // Cleanup message listener
-        if (unsubscribeMessages) {
-            unsubscribeMessages();
-            unsubscribeMessages = null;
-        }
-        
-        currentChatUserId = null;
-    }
-    
-    // ==================== HELPER FUNCTIONS ====================
-    // Handle Enter key
-    document.getElementById('messageInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-    
-    // Handle Enter key on auth
-    document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleAuth();
-        }
-    });
-    
-</script>
-</body>
-</html>
+        unsubscribeUsers = db.collection('users').onSnapshot((snapshot) => 
