@@ -602,4 +602,103 @@
             }
         }
 
-        async function handl
+        async function handleRegister() {
+            const name = document.getElementById('registerName').value;
+            const phone = document.getElementById('registerPhone').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            if(!name || !phone || !password) {
+                showMessage('Name, Phone and Password are required!', 'error');
+                return;
+            }
+            
+            if(phone.length < 10) {
+                showMessage('Enter valid phone number!', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                // Create user with email if provided, otherwise use phone as email
+                const userEmail = email || `${phone}@quvro.user`;
+                
+                const userCredential = await auth.createUserWithEmailAndPassword(userEmail, password);
+                
+                // Save user data to Firestore
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    name: name,
+                    phone: phone,
+                    email: email || '',
+                    countryCode: document.getElementById('countryCode').value,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    online: true
+                });
+                
+                showMessage('Account created successfully!', 'success');
+                
+                setTimeout(() => {
+                    switchAuthTab('login');
+                }, 2000);
+                
+            } catch(error) {
+                showMessage(error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function forgotPassword() {
+            const email = document.getElementById('loginUsername').value;
+            if(!email) {
+                showMessage('Please enter your email first!', 'error');
+                return;
+            }
+            
+            showLoading(true);
+            
+            auth.sendPasswordResetEmail(email)
+                .then(() => {
+                    showMessage(`Reset link sent to ${email}`, 'success');
+                })
+                .catch(error => {
+                    showMessage(error.message, 'error');
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function showQR() {
+            showMessage('QR scanner opening...', 'success');
+        }
+
+        // Auth state observer
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                // User is logged in
+                document.getElementById('authScreen').classList.remove('active');
+                document.getElementById('chatScreen').classList.add('active');
+                
+                // Update online status
+                db.collection('users').doc(user.uid).update({
+                    online: true,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        });
+
+        // Enter key support
+        document.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                if(document.getElementById('loginForm').style.display !== 'none') {
+                    handleLogin();
+                } else {
+                    handleRegister();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
